@@ -1,9 +1,9 @@
-import React from 'react';
-import { buildURI, toCSV } from '../core';
+import React from "react";
+import { buildURI, toCSV } from "../core";
 import {
   defaultProps as commonDefaultProps,
-  propTypes as commonPropTypes
-} from '../metaProps';
+  propTypes as commonPropTypes,
+} from "../metaProps";
 
 /**
  *
@@ -16,18 +16,36 @@ class CSVLink extends React.Component {
   constructor(props) {
     super(props);
     this.buildURI = this.buildURI.bind(this);
-    this.state = { href: '' };
+    this.state = { href: "" };
   }
 
   componentDidMount() {
-    const {data, headers, separator, uFEFF, enclosingCharacter} = this.props;
-    this.setState({ href: this.buildURI(data, uFEFF, headers, separator, enclosingCharacter) });
+    const {
+      data,
+      headers,
+      separator,
+      uFEFF,
+      enclosingCharacter,
+      newline,
+    } = this.props;
+    this.setState({
+      href: this.buildURI(
+        data,
+        uFEFF,
+        headers,
+        separator,
+        enclosingCharacter,
+        newline
+      ),
+    });
   }
 
   componentDidUpdate(prevProps) {
     if (this.props !== prevProps) {
-      const { data, headers, separator, uFEFF } = this.props;
-      this.setState({ href: this.buildURI(data, uFEFF, headers, separator) });
+      const { data, headers, separator, uFEFF, newline } = this.props;
+      this.setState({
+        href: this.buildURI(data, uFEFF, headers, separator, newline),
+      });
     }
   }
 
@@ -50,10 +68,14 @@ class CSVLink extends React.Component {
         separator,
         filename,
         enclosingCharacter,
-        uFEFF
+        uFEFF,
+        newline,
       } = this.props;
 
-      let blob = new Blob([uFEFF ? '\uFEFF' : '', toCSV(data, headers, separator, enclosingCharacter)]);
+      let blob = new Blob([
+        uFEFF ? "\uFEFF" : "",
+        toCSV(data, headers, separator, enclosingCharacter, newline),
+      ]);
       window.navigator.msSaveBlob(blob, filename);
 
       return false;
@@ -61,7 +83,7 @@ class CSVLink extends React.Component {
   }
 
   handleAsyncClick(event) {
-    const done = proceed => {
+    const done = (proceed) => {
       if (proceed === false) {
         event.preventDefault();
         return;
@@ -82,8 +104,8 @@ class CSVLink extends React.Component {
   }
 
   handleClick() {
-    return event => {
-      if (typeof this.props.onClick === 'function') {
+    return (event) => {
+      if (typeof this.props.onClick === "function") {
         return this.props.asyncOnClick
           ? this.handleAsyncClick(event)
           : this.handleSyncClick(event);
@@ -103,6 +125,7 @@ class CSVLink extends React.Component {
       onClick,
       asyncOnClick,
       enclosingCharacter,
+      newline,
       ...rest
     } = this.props;
 
@@ -110,7 +133,7 @@ class CSVLink extends React.Component {
       <a
         download={filename}
         {...rest}
-        ref={link => (this.link = link)}
+        ref={(link) => (this.link = link)}
         target="_self"
         href={this.state.href}
         onClick={this.handleClick()}
